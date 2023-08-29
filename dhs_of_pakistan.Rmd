@@ -1,0 +1,132 @@
+---
+title: "PAKISTAN DEMOGRAPHIC AND HEALTH SURVEY"
+subtitle: "Important Findings About Contraceptives Use and Family Planning Amongst Women In Pakistan"
+author: "AYESHA AYAZ"
+date: "AUG 07, 2023"
+output: prettydoc::html_pretty
+editor_options: 
+  chunk_output_type: inline
+---
+
+The demographic health survey is a large set of data that is collected from almost all the countries in the world. I chose to analyze the subset of DHS that is about Pakistan- KPK(Khyber Pakhtunkhwa). The subset chosen here had 300 observations and 5331 variables. These variables captured information from women between the age of 15-49. the attributes on which this report has been formed are regarding the use of contraceptive methods and the general trend of family planning in KPK, Pakistan.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+if(!require(pacman))install.packages("pacman")
+pacman::p_load(tidyverse,
+               haven, 
+               janitor, 
+               here, 
+               patchwork, 
+               esquisse, 
+               flextable)
+```
+
+```{r echo=FALSE, message=FALSE}
+subset_1 <- haven::read_dta(here("data/PKIR71FL.DTA"),
+                            n_max = 300)
+my_subset <- subset_1 %>% select(v012, #respondent's current age
+                                 v024, # respondent's region
+                                 v106, # highest education level
+                                 v190, # household wealth index 
+                                 v201, # total children ever born
+                                 v225, # was the current pregnancy wanted
+                                 v228, # ever had a terminated pregnancy
+                                 v301, #knowledge of any contraceptive method
+                                 v302, # ever used any method
+                                 v323, # brand of pills used
+                                 v323a, #brand of condom used
+                                 v360, #Reason of last discontinuation
+                                 v363, #preferred method
+                                 v375a, # main reason for not using a method
+                                 v376a, #would ever use a method if married
+                                 v360) #reason for discontinuation
+                                 
+# rename the variables according to our convinience
+re_subset <- my_subset %>% rename(age_of_respondent= v012,
+                                  region_of_respondent= v024,
+                                  highest_education= v106,
+                                  household_wealth= v190,
+                                  total_children_born= v201,
+                                  wanted_current_pregnancy= v225,
+                                  terminated_pregnancy= v228,
+                                  contraceptive_method_knowledge= v301,
+                                  contraceptive_method_used= v302,
+                                  brands_of_pill_used= v323,
+                                  brands_of_condom_used= v323a,
+                                  discontinuation_reason= v360,
+                                  preferred_contraceptive_method= v363,
+                                  reason_of_not_using_any_method= v375a,
+                                  if_married_will_use= v376a,
+                                  )
+#convert the subset from labeeled data to factors
+converted_data <- re_subset %>% haven::as_factor()
+
+```
+
+```{r echo=FALSE, message=FALSE}
+plot1 <- ggplot(data=converted_data,
+       mapping=aes(x=total_children_born,
+                   y= highest_education,
+                   fill=highest_education,
+                   color=highest_education))+
+  geom_boxplot()+
+  stat_summary(fun= "mean",
+               geom="point",
+               size=3,
+               shape=23,
+               fill="white")+
+  labs(title= "Relation Between Highest Level of Education and Total No of Children",
+       subtitle= "DHS KPK-Pakistan 2017-2018",
+       x="total children of the respondent",
+       y="highest level of education of respondent")
+plot1
+               
+```
+
+The plot clearly shows that the higher the level of education the lower the no of children women have.Women who have attained secondary or higher level education have almost similar trend regarding the number of children but even among them the women who have a higher level of education have on average lower no of children. the strata of population that is least educated on average has 4 or on a higher side maximum 6 children whereas a person who has higher education level on average has 2 children.
+
+```{r echo=FALSE, message=FALSE}
+# reasons for discontinuation of protected sex
+plot2 <- ggplot(data=converted_data,
+       mapping=aes(y=discontinuation_reason))+
+  geom_bar(fill="purple",
+           color="black",
+           alpha=0.5)+
+  labs(title= "Reasons For Discontinuation of Use of the Contraception ",
+       subtitle = "DHS KPK-PAKISTAN (2017-2018)",
+       x="resaons for discontinuation",
+       y="no of respondents")
+plot2
+
+```
+
+Highest number of women stop using contraceptives because they wanted to become pregnant. the second reason for terminating the use is because of the side effects that the contraceptive methods cause. So to prevent promote safe and protected sex there is a need to focus on educating people properly about the side effects and providing them with the best option. the third reason is quite natural that when the couple is not having sex regularly, but couples going through such a situation should be guided about appropriate methods that they can use in such a situation and thus prevent unwanted pregnancy.
+
+```{r echo=FALSE, message=FALSE}
+plot3 <- ggplot(data=converted_data,
+       mapping = aes(x=contraceptive_method_knowledge))+
+       geom_bar(fill="pink",
+                color="black")+
+  labs(x="knowledge about different contraceptives",
+       y="no of respondents",
+    title="Prevalence of Knowledge About Different Contraceptive Methods",
+    subtitle = "DHS KPK-PAKISTAN (2017-2018")
+plot3
+
+```
+
+The graph shows that most of the women in fact almost all of the respondets had knowledge about modern contraceptive methods that can be used.This shows that the problem is not about awareness there are some other factors that are hindering effective family planning which need to be worked upon.
+
+```{r echo=FALSE, message=FALSE}
+plot4 <- ggplot(data=converted_data,
+       mapping=aes(x=household_wealth,
+                   y=total_children_born))+
+  geom_boxplot(fill="violetred4",
+               alpha=0.65)+
+  labs(y="total children of respondents",
+       x="level of wealth of respondents",
+       title="Comparison of Level of wealth to Total no of Children")
+plot4
+```
+
+The 4th plot gives us insight into the comparison between level of wealth of the respondents and the number of children the respondents have. the poorest of the society have the highest number of children that is 6 where as from middle class and on wards the number of children is decreasing, with the median number of children is same for upper class, upper middle class and middle class that is 3.the median no of children for the lower and lowest economic class is 4.
